@@ -1,42 +1,17 @@
-import React, { Component, memo } from "react";
+import React, { useState } from "react";
 import "./App.css";
 
-
-const Foo = memo(function Foo(props){
-  console.log('Foo render')
-
-  return <div>{props.person.age}</div>;
+function App(props){
+  const defaultCount = props.defaultCount || 0;
+  const [count, setCount] = useState(defaultCount)
+  //useState 按照第一次返回的顺序给你state的
   
-})
-
-
-class App extends Component {
-  state = {
-    count: 0,
-    person:{
-      age:1
-    }
-  };
-
-  callback= ()=>{
-    //this 的指向问题
-  }
-  render() {
-    const person = this.state.person
-
-    return (
-      <div>
-        <button onClick={() => {
-          person.age++;
-          this.setState({ 
-            count: this.state.count + 1 })
-          }}>
-          add
-        </button>
-        <Foo person={person} cb={this.callback}/>
-      </div>
-    );
-  }
+  return(
+    <button onClick={()=>{ setCount(1)}}>
+      Click({count})
+    </button>
+  )
 }
+
 
 export default App;
