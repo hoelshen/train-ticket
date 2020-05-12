@@ -1,36 +1,66 @@
-import React, { PureComponent,useState, createContext,useContext, useMemo, memo , useCallback, useRef} from "react";
+import React, { PureComponent,useState, useEffect,createContext,useContext, useMemo, memo , useCallback, useRef} from "react";
 import "./App.css";
-import { Component } from "react";
 
-class Counter extends PureComponent{
-  speak(){
-    console.log(`now count ${this.props.count}`)
-  }
-  render(){
-    const {props} = this
-    return (
-      <h1 onClick={props.onClick}>{props.count}</h1>
-      )
-  }
-
+function useCounter(props){
+  const size = useSize()
+  return(
+  <h1 >{props}, {size.width} * {size.height}</h1>
+  )
 }
 
+
+
+function useCount(defaultCount) {
+  const [count, setCount] = useState(defaultCount);
+  const it = useRef();
+
+
+  useEffect(()=>{
+    it.current = setInterval(()=>{
+      setCount(count => count +1)
+    }, 1000)
+  }, [])
+
+  useEffect(()=>{
+    if(count >= 10){
+      clearInterval(it.current)
+    }
+  })
+  return  [count, setCount]
+};
+
+function useSize(){
+
+  function onResize(){
+    setSize({
+        width: document.documentElement.clientWidth,
+        height: document.documentElement.clientHeight,
+      }
+    )
+  }
+  const [size, setSize] = useState({
+    width: document.documentElement.clientWidth,
+    height: document.documentElement.clientHeight,
+  })
+
+  useEffect(()=>{
+    window.addEventListener('resize', onResize, false)
+    return ()=>{
+    window.removeEventListener('resize', onResize, false)
+
+    }
+  }, [])
+
+  return size
+}
+
+
+
+
 function App2(props) {
-  const [count, setCount] = useState(0);
-  const [clickCount, setClickCount] = useState(0)
-  const double = useMemo(()=>{
-    return count * 2
-  },[count === 3])
-
-  const counterRef = useRef();
-
-  const onClick = useCallback(()=>{
-    console.log('Click')
-    setClickCount(clickCount + 1);
-    console.log(counterRef.current)
-  }, [counterRef])
-
-
+const [count, setCount] = useCount(0);
+const Counter = useCounter(count)
+const size = useSize();
   return (
     <div>
       <button
@@ -38,10 +68,10 @@ function App2(props) {
           setCount(count + 1);
         }}
       >
-        Click({count}), double: ({double})
+        Click({count})
       </button>
-    
-        <Counter ref={counterRef} count={double} onClick={onClick}> </Counter>
+      {size.width} * {size.height}
+      {Counter}
     </div>
   );
 }
