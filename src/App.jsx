@@ -1,7 +1,19 @@
-import React, { useState, createContext,useContext, useMemo, memo , useCallback} from "react";
+import React, { PureComponent,useState, createContext,useContext, useMemo, memo , useCallback, useRef} from "react";
 import "./App.css";
 import { Component } from "react";
 
+class Counter extends PureComponent{
+  speak(){
+    console.log(`now count ${this.props.count}`)
+  }
+  render(){
+    const {props} = this
+    return (
+      <h1 onClick={props.onClick}>{props.count}</h1>
+      )
+  }
+
+}
 
 function App2(props) {
   const [count, setCount] = useState(0);
@@ -10,23 +22,14 @@ function App2(props) {
     return count * 2
   },[count === 3])
 
-/*   const onClick = useMemo(()=>{
-    return ()=>{
-      console.log('Click')
-    }
-  }, []) */
+  const counterRef = useRef();
+
   const onClick = useCallback(()=>{
     console.log('Click')
     setClickCount(clickCount + 1);
-  }, [clickCount])
-  //if useMemo(()=> fn)
-  //useCallback(fn) 
-  const Count = memo(function Counter(props){
-    console.log('Count render')
-    return (
-    <h1>{props.count}</h1>
-    )
-  })
+    console.log(counterRef.current)
+  }, [counterRef])
+
 
   return (
     <div>
@@ -38,7 +41,7 @@ function App2(props) {
         Click({count}), double: ({double})
       </button>
     
-        <Count count={double} onClick={onClick}> </Count>
+        <Counter ref={counterRef} count={double} onClick={onClick}> </Counter>
     </div>
   );
 }
