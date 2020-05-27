@@ -1,7 +1,27 @@
 import React, { PureComponent,useState, useEffect,createContext,useContext, useMemo, memo , useCallback, useRef} from "react";
 import "./App.css";
 
+import {
+  createAdd,
+  createRemove,
+  createSet,
+  createToggle
+} from './action'
 let idSeq = Date.now();
+
+
+function bindActionCreators(actionCreators, dispatch) {
+  const ret = {}
+  for(let key in actionCreators){
+    ret[key] = function(...args){
+      const actionCreator = actionCreators[key]
+      const action = actionCreator(...args);
+      dispatch(action)
+    }
+  }
+
+  return ret
+}
 
 
 const LS_KEY = '_$-Todos_';
@@ -18,12 +38,12 @@ function App(props) {
       const newText = inputRef.current.value.trim();
       if(newText.length == 0) return;
   
+
       addTodo({
         id: ++idSeq,
         value: newText,
         complete: false
       })
-  
       inputRef.current.value = ''
     }
 
@@ -45,7 +65,7 @@ function App(props) {
   })
   
   const Todos = memo(function Todos(props){
-    const { todos, toggleTodo, removeTodo } = props; 
+    const { todos, removeTodo, toggleTodo } = props; 
     return (
       <ul>
         {
@@ -55,11 +75,11 @@ function App(props) {
                 key={todo.id}
                 todo={todo}
                 toggleTodo={toggleTodo}
-                removeTodo = {removeTodo}
+                removeTodo={removeTodo}
               />)
           })
         }
-      </ul>  
+      </ul>
     )
   })
 
@@ -67,10 +87,11 @@ function App(props) {
     const {
       todo: {
         id,value,complete
-      }, toggleTodo, removeTodo
+      }, toggleTodo,
+      removeTodo
     } = props;
     const onChange = ()=>{
-      toggleTodo(id)
+        toggleTodo(id)
     }
 
     const onRemove = ()=>{
@@ -86,31 +107,11 @@ function App(props) {
   })
 
   const [todos, setTodos] = useState([])
-  const addTodo = useCallback((todo)=>{
-    setTodos(todos=> [...todos, todo])
-  })
-
-  const removeTodo = useCallback((id)=>{
-    setTodos(todos => todos.filter(todo=>{
-      return todo.id !== id
-    }))
-  })
-
-  const toggleTodo = useCallback((id)=>{
-    console.log('id: ', id);
-    setTodos(todos => todos.map(todo=>{
-      return todo.id == id
-          ? {
-            ...todo,
-            complete : !todo.complete
-          }
-          : todo
-    }))
-  })
 
   useEffect(()=>{
-    const value = JSON.parse(localStorage.getItem(LS_KEY));
-    if(value) setTodos(value)
+    const value = JSON.parse(localStorage.getItem(LS_KEY)) || [];
+    console.log('value: ', value);
+    dispatch(createSet(value))
   }, [])
 
   useEffect(()=>{
@@ -119,33 +120,53 @@ function App(props) {
 
 
 
+
+  const dispatch = useCallback((action) => {
+    const { type, payload} = action;
+    switch (type){
+      case 'set':
+        setTodos(payload);
+        break ;
+      case 'add':
+        setTodos(todos=> [...todos, payload])
+        break ;
+      case 'remove':
+        setTodos(todos => todos.filter(todo=>{
+          return todo.id !== payload
+        }))
+      break;
+      case 'toggle':
+        setTodos(todos => todos.map(todo=>{
+          return todo.id == payload
+              ? {
+                ...todo,
+                complete : !todo.complete
+              }
+              : todo
+        }))
+        break;
+      default:
+    }
+  },[])
+
   return (
     <div className='todo-list'>
-      <Control addTodo={addTodo}></Control>
-      <Todos todos={todos} removeTodo={removeTodo} toggleTodo={toggleTodo}></Todos>
+      <Control 
+      {
+        ...bindActionCreators({
+          addTodo: createAdd
+        }, dispatch)
+      }></Control>
+      <Todos todos={todos} 
+      {
+        ...bindActionCreators({
+          toggleTodo: createToggle ,
+          removeTodo: createRemove
+        }, dispatch)
+      }>
+        </Todos>
     </div>
   );
 }
 
 export default App;
-
-
-function List(props){
-  const { list } = props
-
-  return (
-    <ul>
-      {
-        list.map(item=>{
-          return (
-            <li>
-            <input type="checkout"/>
-            <span>item.val</span>
-            <span>x</span>
-            </li>
-          )
-        })
-      }
-    </ul>
-  )
-}
