@@ -23,11 +23,27 @@ function bindActionCreators(actionCreators, dispatch) {
   return ret
 }
 
+function combineReducers(reducers) {
+  return function reducer(state, action) {
+    const changed  = {};
+    for(let key in reducers){
+      changed[key] = reducers[key](state[key], action)
+    }
+  }
+
+  return {
+    ...state,
+    ...changed
+  }
+}
+
 
 const LS_KEY = '_$-Todos_';
 
 function App(props) {
   const [todo, setTodo] = useState([]);
+  const [incrementCount, setIncrementCount] = useState(0);
+
 
   const Control = memo(function Control(props) {
     const { addTodo } = props;
@@ -119,35 +135,71 @@ function App(props) {
   }, [todos])
 
 
+  const reducers = {
+    todos(state, action){
+      const { type, payload } = action;
+      switch(type) {
+        case 'set':
+          return payload
+        case 'add':
+          return [...state, payload]
+        case 'remove':
+          return state.filter(todo=>{
+            return todo.id !== payload
+          })
+        case 'toggle':
+          return state.map(todo=>{
+            return todo.id == payload
+                ? {
+                  ...todo,
+                  complete : !todo.complete
+                }
+                : todo
+          })
+          default 
+      }
+
+      return state
+    },
+    incrementCount(state, action){
+      const { type, payload } = action;
+      switch(type){
+        case 'set':
+        case 'add':
+          return state + 1
+      }
+      return state
+    }
+  }
+
+
+  function reducer(state, action) {
+    const { type, payload } = action;
+
+
+    return state
+  }
 
 
   const dispatch = useCallback((action) => {
-    const { type, payload} = action;
-    switch (type){
-      case 'set':
-        setTodos(payload);
-        break ;
-      case 'add':
-        setTodos(todos=> [...todos, payload])
-        break ;
-      case 'remove':
-        setTodos(todos => todos.filter(todo=>{
-          return todo.id !== payload
-        }))
-      break;
-      case 'toggle':
-        setTodos(todos => todos.map(todo=>{
-          return todo.id == payload
-              ? {
-                ...todo,
-                complete : !todo.complete
-              }
-              : todo
-        }))
-        break;
-      default:
+    const state = {
+      todos,
+      incrementCount
     }
-  },[])
+
+    const setters = {
+      todos: setTodos,
+      incrementCount: setIncrementCount
+    }
+
+    const newState = reducer(state, action);
+
+    for(let key in newState){
+      setters[key](newState[key])
+    }
+
+
+  },[todos, incrementCount])
 
   return (
     <div className='todo-list'>
