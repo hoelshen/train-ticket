@@ -1,222 +1,161 @@
-import React, { PureComponent,useState, useEffect,createContext,useContext, useMemo, memo , useCallback, useRef} from "react";
+import React, {
+  useState,
+  useEffect,
+  memo,
+  useCallback,
+  useRef,
+} from "react";
 import "./App.css";
 
-import {
-  createAdd,
-  createRemove,
-  createSet,
-  createToggle
-} from './action'
+import { createAdd, createRemove, createSet, createToggle } from "./action";
+
+import reducer from "./reducers";
 let idSeq = Date.now();
 
+function bindActionCreators(actionCreators, dispath) {
+  const ret = {};
 
-function bindActionCreators(actionCreators, dispatch) {
-  const ret = {}
-  for(let key in actionCreators){
-    ret[key] = function(...args){
-      const actionCreator = actionCreators[key]
+  for (let key in actionCreators) {
+    ret[key] = function (...args) {
+      const actionCreator = actionCreators[key];
       const action = actionCreator(...args);
-      dispatch(action)
-    }
+      dispath(action);
+    };
   }
-
-  return ret
+  return ret;
 }
 
-function combineReducers(reducers) {
-  return function reducer(state, action) {
-    const changed  = {};
-    for(let key in reducers){
-      changed[key] = reducers[key](state[key], action)
-    }
-  }
-
-  return {
-    ...state,
-    ...changed
-  }
-}
-
-
-const LS_KEY = '_$-Todos_';
+const LS_KEY = "_$-Todos_";
 
 function App(props) {
   const [todo, setTodo] = useState([]);
   const [incrementCount, setIncrementCount] = useState(0);
 
-
   const Control = memo(function Control(props) {
     const { addTodo } = props;
     const inputRef = useRef();
-  
-    const onSubmit = (e)=>{
-      e.preventDefault()
+
+    const onSubmit = (e) => {
+      e.preventDefault();
       const newText = inputRef.current.value.trim();
-      if(newText.length == 0) return;
-  
+      if (newText.length == 0) return;
 
       addTodo({
         id: ++idSeq,
         value: newText,
-        complete: false
-      })
-      inputRef.current.value = ''
-    }
-
+        complete: false,
+      });
+      inputRef.current.value = "";
+    };
 
     return (
-      <div className='control'>
+      <div className="control">
         <h1>todos</h1>
         <form onSubmit={onSubmit}>
-            <input
+          <input
             type="text"
-            className='new-todo'
+            className="new-todo"
             ref={inputRef}
-            placeholder='what need to be done'>
-            
-            </input> 
-        </form>  
-      </div> 
-    )
-  })
-  
-  const Todos = memo(function Todos(props){
-    const { todos, removeTodo, toggleTodo } = props; 
+            placeholder="what need to be done"
+          ></input>
+        </form>
+      </div>
+    );
+  });
+
+  const Todos = memo(function Todos(props) {
+    const { todos, removeTodo, toggleTodo } = props;
     return (
       <ul>
-        {
-          todos.map(todo =>  {
-            return (
-              <TodoItem
-                key={todo.id}
-                todo={todo}
-                toggleTodo={toggleTodo}
-                removeTodo={removeTodo}
-              />)
-          })
-        }
+        {todos.map((todo) => {
+          return (
+            <TodoItem
+              key={todo.id}
+              todo={todo}
+              toggleTodo={toggleTodo}
+              removeTodo={removeTodo}
+            />
+          );
+        })}
       </ul>
-    )
-  })
+    );
+  });
 
-  const TodoItem = memo(function TodoItem(props){
+  const TodoItem = memo(function TodoItem(props) {
     const {
-      todo: {
-        id,value,complete
-      }, toggleTodo,
-      removeTodo
+      todo: { id, value, complete },
+      toggleTodo,
+      removeTodo,
     } = props;
-    const onChange = ()=>{
-        toggleTodo(id)
-    }
+    const onChange = () => {
+      toggleTodo(id);
+    };
 
-    const onRemove = ()=>{
-      removeTodo(id)
-    }
+    const onRemove = () => {
+      removeTodo(id);
+    };
     return (
-      <li className='todo-item'>
-        <input type="checkbox" onChange={onChange} checked={complete}/>
-        <label className={complete ? 'complete' : ''}>{value}</label>
+      <li className="todo-item">
+        <input type="checkbox" onChange={onChange} checked={complete} />
+        <label className={complete ? "complete" : ""}>{value}</label>
         <button onClick={onRemove}>&#xd7;</button>
       </li>
-    )
-  })
+    );
+  });
 
-  const [todos, setTodos] = useState([])
+  const [todos, setTodos] = useState([]);
 
-  useEffect(()=>{
+  useEffect(() => {
     const value = JSON.parse(localStorage.getItem(LS_KEY)) || [];
-    console.log('value: ', value);
-    dispatch(createSet(value))
-  }, [])
+    console.log("value: ", value);
+    dispatch(createSet(value));
+  }, []);
 
-  useEffect(()=>{
+  useEffect(() => {
     localStorage.setItem(LS_KEY, JSON.stringify(todos));
-  }, [todos])
+  }, [todos]);
 
+  const dispatch = useCallback(
+    (action) => {
+      const state = {
+        todos,
+        incrementCount,
+      };
 
-  const reducers = {
-    todos(state, action){
-      const { type, payload } = action;
-      switch(type) {
-        case 'set':
-          return payload
-        case 'add':
-          return [...state, payload]
-        case 'remove':
-          return state.filter(todo=>{
-            return todo.id !== payload
-          })
-        case 'toggle':
-          return state.map(todo=>{
-            return todo.id == payload
-                ? {
-                  ...todo,
-                  complete : !todo.complete
-                }
-                : todo
-          })
-          default 
+      const setters = {
+        todos: setTodos,
+        incrementCount: setIncrementCount,
+      };
+
+      const newState = reducer(state, action);
+
+      for (let key in newState) {
+        setters[key](newState[key]);
       }
-
-      return state
     },
-    incrementCount(state, action){
-      const { type, payload } = action;
-      switch(type){
-        case 'set':
-        case 'add':
-          return state + 1
-      }
-      return state
-    }
-  }
-
-
-  function reducer(state, action) {
-    const { type, payload } = action;
-
-
-    return state
-  }
-
-
-  const dispatch = useCallback((action) => {
-    const state = {
-      todos,
-      incrementCount
-    }
-
-    const setters = {
-      todos: setTodos,
-      incrementCount: setIncrementCount
-    }
-
-    const newState = reducer(state, action);
-
-    for(let key in newState){
-      setters[key](newState[key])
-    }
-
-
-  },[todos, incrementCount])
+    [todos, incrementCount]
+  );
 
   return (
-    <div className='todo-list'>
-      <Control 
-      {
-        ...bindActionCreators({
-          addTodo: createAdd
-        }, dispatch)
-      }></Control>
-      <Todos todos={todos} 
-      {
-        ...bindActionCreators({
-          toggleTodo: createToggle ,
-          removeTodo: createRemove
-        }, dispatch)
-      }>
-        </Todos>
+    <div className="todo-list">
+      <Control
+        {...bindActionCreators(
+          {
+            addTodo: createAdd,
+          },
+          dispatch
+        )}
+      ></Control>
+      <Todos
+        todos={todos}
+        {...bindActionCreators(
+          {
+            toggleTodo: createToggle,
+            removeTodo: createRemove,
+          },
+          dispatch
+        )}
+      ></Todos>
     </div>
   );
 }
