@@ -1,16 +1,9 @@
-import React, {
-  useState,
-  useEffect,
-  memo,
-  useCallback,
-  useRef,
-} from "react";
+import React, { useState, useEffect, memo, useCallback, useRef } from "react";
 import "./App.css";
 
 import { createAdd, createRemove, createSet, createToggle } from "./action";
 
 import reducer from "./reducers";
-let idSeq = Date.now();
 
 function bindActionCreators(actionCreators, dispath) {
   const ret = {};
@@ -26,7 +19,10 @@ function bindActionCreators(actionCreators, dispath) {
 }
 
 const LS_KEY = "_$-Todos_";
-
+let store = {
+  todos: [],
+  incrementCount: 0,
+};
 function App(props) {
   const [todo, setTodo] = useState([]);
   const [incrementCount, setIncrementCount] = useState(0);
@@ -40,11 +36,7 @@ function App(props) {
       const newText = inputRef.current.value.trim();
       if (newText.length == 0) return;
 
-      addTodo({
-        id: ++idSeq,
-        value: newText,
-        complete: false,
-      });
+      addTodo(newText);
       inputRef.current.value = "";
     };
 
@@ -62,6 +54,8 @@ function App(props) {
       </div>
     );
   });
+
+
 
   const Todos = memo(function Todos(props) {
     const { todos, removeTodo, toggleTodo } = props;
@@ -83,7 +77,7 @@ function App(props) {
 
   const TodoItem = memo(function TodoItem(props) {
     const {
-      todo: { id, value, complete },
+      todo: { id, text, complete },
       toggleTodo,
       removeTodo,
     } = props;
@@ -97,7 +91,7 @@ function App(props) {
     return (
       <li className="todo-item">
         <input type="checkbox" onChange={onChange} checked={complete} />
-        <label className={complete ? "complete" : ""}>{value}</label>
+        <label className={complete ? "complete" : ""}>{text}</label>
         <button onClick={onRemove}>&#xd7;</button>
       </li>
     );
@@ -115,26 +109,30 @@ function App(props) {
     localStorage.setItem(LS_KEY, JSON.stringify(todos));
   }, [todos]);
 
-  const dispatch = useCallback(
-    (action) => {
-      const state = {
-        todos,
-        incrementCount,
-      };
+  useEffect(() => {
+    Object.assign(store, {
+      todos,
+      incrementCount,
+    });
+  }, [todos, incrementCount]);
 
-      const setters = {
-        todos: setTodos,
-        incrementCount: setIncrementCount,
-      };
+  const dispatch = (action) => {
+    const setters = {
+      todos: setTodos,
+      incrementCount: setIncrementCount,
+    };
 
-      const newState = reducer(state, action);
+    if ("function" === typeof action) {
+      action(dispatch, () => store);
+      return;
+    }
 
-      for (let key in newState) {
-        setters[key](newState[key]);
-      }
-    },
-    [todos, incrementCount]
-  );
+    const newState = reducer(store, action);
+
+    for (let key in newState) {
+      setters[key](newState[key]);
+    }
+  };
 
   return (
     <div className="todo-list">
