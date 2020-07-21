@@ -22,6 +22,7 @@ import {
 } from './actions';
 
 function App(props) {
+  console.log('props: ', props);
   const {
       from,
       to,
