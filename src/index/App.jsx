@@ -7,11 +7,15 @@ import { connect } from 'react-redux';
 import './App.css';
 
 import Header from '../common/Header.jsx';
+import DepartDate from './DepartDate.jsx';
 
 import Journey from './Journey.jsx';
 import Submit from './Submit.jsx';
 
 import CitySelector from '../common/CitySelector.jsx';
+import DateSelector from '../common/DateSelector.jsx';
+
+import { h0 } from '../common/fp';
 
 import {
   exchangeFromTo,
@@ -19,6 +23,9 @@ import {
   hideCitySelector,
   fetchCityData,
   setSelectedCity,
+  showDateSelector,
+  hideDateSelector,
+  setDepartDate,
 } from './actions';
 
 function App(props) {
@@ -27,9 +34,11 @@ function App(props) {
       from,
       to,
       isCitySelectorVisible,
+      isDateSelectorVisible,
       cityData,
       isLoadingCityData,
       dispatch,
+      departDate,
   } = props;
 
   const onBack = useCallback(() => {
@@ -51,6 +60,35 @@ function App(props) {
       }, dispatch);
   }, [dispatch]);
 
+  const departDateCbs = useMemo(() => {
+      return bindActionCreators({
+          onClick: showDateSelector,
+      }, dispatch);
+  }, [dispatch]);
+
+  const dateSelectorCbs = useMemo(() => {
+    return bindActionCreators(
+        {
+            onBack: hideDateSelector,
+        },
+        dispatch
+    );
+  }, [dispatch]);
+
+
+  const onSelectDate = useCallback(day => {
+      if (!day) {
+          return;
+      }
+
+      if (day < h0()) {
+          return;
+      }
+
+      dispatch(setDepartDate(day));
+      dispatch(hideDateSelector());
+  }, [dispatch]);
+
   return (
       <div>
           <div className="header-wrapper">
@@ -62,6 +100,10 @@ function App(props) {
                   to={to}
                   {...cbs}
               />
+              <DepartDate
+                  time={departDate}
+                  {...departDateCbs}
+              />              
               <Submit/>
           </form>
           <CitySelector
@@ -69,6 +111,11 @@ function App(props) {
               cityData={cityData}
               isLoading={isLoadingCityData}
               {...citySelectorCbs}
+          />
+          <DateSelector
+              show={isDateSelectorVisible}
+              {...dateSelectorCbs}
+              onSelect={onSelectDate}
           />
       </div>
   );

@@ -196,7 +196,7 @@ const Suggest = memo(function Suggest(props) {
 );
 });
 
-Suggest.PropTypes = {
+Suggest.propTypes = {
   searchKey: PropTypes.string.isRequired,
   onSelect: PropTypes.func.isRequired,
 };
