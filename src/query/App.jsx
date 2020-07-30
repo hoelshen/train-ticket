@@ -1,26 +1,139 @@
-import React , { useCallback }from 'react';
+import React , { useCallback, useEffect  }from 'react';
 
 import { connect } from "react-redux";
+
+import URI from 'urijs';
+
+import dayjs from 'dayjs'
+
+import { h0 } from '../common/fp';
 
 import Header from '../common/Header.jsx';
 import Nav from '../common/Nav.jsx';
 import List from './List.jsx';
 import Bottom from './Bottom.jsx';
 
+import {
+  setFrom,
+  setTo,
+  setDepartDate,
+  setHighSpeed,
+  setSearchParsed,
+
+  setTrainList,
+  setTicketTypes,
+  setTrainTypes,
+  setDepartStations,
+  setArriveStations,
+
+  prevDate,
+  nextDate,
+} from './actions';
+
 import './App.css';
 function App(props) {
+  const {
+    from,
+    to,
+    departDate,
+    highSpeed,
+    searchParsed,
+    dispatch,
+    orderType,
+    onlyTickets,
+    checkedTicketTypes,
+    checkedTrainTypes,
+    checkedDepartStattions,
+    checkedArriveStatsions,
+    departTimeStart,
+    departTimeEnd,
+    arriveTimeStart,
+    arriveTimeEnd,  
+} = props;
+
+useEffect(() => {
+  const queries = URI.parseQuery(window.location.search);
+
+  const {
+      from,
+      to,
+      date,
+      highSpeed,
+  } = queries;
+
+  dispatch(setFrom(from));
+  dispatch(setTo(to));
+  dispatch(setDepartDate(h0(dayjs(date).valueOf())));
+  dispatch(setHighSpeed(highSpeed === 'true'));
+  dispatch(setSearchParsed(true));
+
+}, [dispatch]);
+
+
+  useEffect(() => {
+    if (!searchParsed) {
+        return;
+    }
+    const url = new URI('/rest/query')
+      .setSearch('from', from)
+      .setSearch('to', to)
+      .setSearch('date', dayjs(departDate).format('YYYY-MM-DD'))
+      .setSearch('highSpeed', highSpeed)
+      .setSearch('orderType', orderType)
+      .setSearch('onlyTickets', onlyTickets)
+      .setSearch('checkedTicketTypes', Object.keys(checkedTicketTypes).join())
+      .setSearch('checkedTrainTypes', Object.keys(checkedTrainTypes).join())
+      .setSearch('checkedDepartStattions', Object.keys(checkedDepartStattions).join())
+      .setSearch('checkedArriveStatsions', Object.keys(checkedArriveStatsions).join())
+      .setSearch('departTimeStart', departTimeStart)
+      .setSearch('departTimeEnd', departTimeEnd)
+      .setSearch('arriveTimeStart', arriveTimeStart)
+      .setSearch('arriveTimeEnd', arriveTimeEnd)
+      .toString();
+
+      fetch(url)
+      .then(response => response.json())
+      .then(result => {
+        const {
+            dataMap: {
+                directTrainInfo: {
+                    trains,
+                    filter: {
+                        ticketType,
+                        trainType,
+                        depStation,
+                        arrStation,
+                    },
+                },
+            },
+        } = result;
+
+        dispatch(setTrainList(trains));
+        dispatch(setTicketTypes(ticketType));
+        dispatch(setTrainTypes(trainType));
+        dispatch(setDepartStations(depStation));
+        dispatch(setArriveStations(arrStation));
+    });
+  }, [from, to, departDate, highSpeed, searchParsed, orderType, onlyTickets, checkedTicketTypes, checkedTrainTypes, checkedDepartStattions, checkedArriveStatsions, departTimeStart, departTimeEnd, arriveTimeStart, arriveTimeEnd, dispatch]);
 
   const onBack = useCallback(() => {
     window.history.back();
   }, []);
 
+  if (!searchParsed) {
+      return null;
+  }
+  const isPrevDisabled = h0(departDate) <= h0(); 
+  const isNextDisabled = h0(departDate) - h0() > 20 * 86400 * 1000;
 
   return (
       <div>
           <div className="header-wrapper">
-          <Header title="" onBack={onBack}/>
+          <Header title={`${from} ⇀ ${to}`} onBack={onBack}/>
           </div>
-          <Nav/>
+          <Nav
+                date={departDate}
+          />
           <List/>
           <Bottom/>
       </div>
