@@ -1,4 +1,6 @@
-import React , { useCallback, useEffect  }from 'react';
+import React , { useCallback, useEffect,
+  useMemo,
+}from 'react';
 
 import { connect } from "react-redux";
 
@@ -6,12 +8,15 @@ import URI from 'urijs';
 
 import dayjs from 'dayjs'
 
+import { bindActionCreators } from 'redux';
+
 import { h0 } from '../common/fp';
 
 import Header from '../common/Header.jsx';
 import Nav from '../common/Nav.jsx';
 import List from './List.jsx';
 import Bottom from './Bottom.jsx';
+import useNav from '../common/useNav';
 
 import {
   setFrom,
@@ -28,11 +33,26 @@ import {
 
   prevDate,
   nextDate,
+
+  toggleOrderType,
+  toggleHighSpeed,
+  toggleOnlyTickets,
+  toggleIsFiltersVisible,
+
+  setCheckedTicketTypes,
+  setCheckedTrainTypes,
+  setCheckedDepartStations,
+  setCheckedArriveStations,
+  setDepartTimeStart,
+  setDepartTimeEnd,
+  setArriveTimeStart,
+  setArriveTimeEnd,
 } from './actions';
 
 import './App.css';
 function App(props) {
   const {
+    trainList,
     from,
     to,
     departDate,
@@ -41,10 +61,15 @@ function App(props) {
     dispatch,
     orderType,
     onlyTickets,
+    isFiltersVisible,
+    ticketTypes,
+    trainTypes,
+    departStations,
+    arriveStations,
     checkedTicketTypes,
     checkedTrainTypes,
-    checkedDepartStattions,
-    checkedArriveStatsions,
+    checkedDepartStations,
+    checkedArriveStations,
     departTimeStart,
     departTimeEnd,
     arriveTimeStart,
@@ -83,8 +108,8 @@ useEffect(() => {
       .setSearch('onlyTickets', onlyTickets)
       .setSearch('checkedTicketTypes', Object.keys(checkedTicketTypes).join())
       .setSearch('checkedTrainTypes', Object.keys(checkedTrainTypes).join())
-      .setSearch('checkedDepartStattions', Object.keys(checkedDepartStattions).join())
-      .setSearch('checkedArriveStatsions', Object.keys(checkedArriveStatsions).join())
+      .setSearch('checkedDepartStations', Object.keys(checkedDepartStations).join())
+      .setSearch('checkedDepartStations', Object.keys(checkedArriveStations).join())
       .setSearch('departTimeStart', departTimeStart)
       .setSearch('departTimeEnd', departTimeEnd)
       .setSearch('arriveTimeStart', arriveTimeStart)
@@ -114,17 +139,42 @@ useEffect(() => {
         dispatch(setDepartStations(depStation));
         dispatch(setArriveStations(arrStation));
     });
-  }, [from, to, departDate, highSpeed, searchParsed, orderType, onlyTickets, checkedTicketTypes, checkedTrainTypes, checkedDepartStattions, checkedArriveStatsions, departTimeStart, departTimeEnd, arriveTimeStart, arriveTimeEnd, dispatch]);
+  }, [from, to, departDate, highSpeed, searchParsed, orderType, onlyTickets, checkedTicketTypes, checkedTrainTypes, departTimeStart, departTimeEnd, arriveTimeStart, arriveTimeEnd, dispatch, checkedDepartStations, checkedArriveStations]);
 
   const onBack = useCallback(() => {
     window.history.back();
   }, []);
 
+  const {
+      isPrevDisabled,
+      isNextDisabled,
+      prev,
+      next,
+  } = useNav(departDate, dispatch, prevDate, nextDate);
+
+  const bottomCbs = useMemo(() => {
+    return bindActionCreators({
+        toggleOrderType,
+        toggleHighSpeed,
+        toggleOnlyTickets,
+        toggleIsFiltersVisible,
+        setCheckedTicketTypes,
+        setCheckedTrainTypes,
+        setCheckedDepartStations,
+        setCheckedArriveStations,
+        setDepartTimeStart,
+        setDepartTimeEnd,
+        setArriveTimeStart,
+        setArriveTimeEnd,
+    }, dispatch);
+  }, [dispatch]);
+
+
+
   if (!searchParsed) {
       return null;
   }
-  const isPrevDisabled = h0(departDate) <= h0(); 
-  const isNextDisabled = h0(departDate) - h0() > 20 * 86400 * 1000;
+
 
   return (
       <div>
@@ -133,9 +183,31 @@ useEffect(() => {
           </div>
           <Nav
                 date={departDate}
-          />
-          <List/>
-          <Bottom/>
+                isPrevDisabled={isPrevDisabled}
+                isNextDisabled={isNextDisabled}
+                prev={prev}
+                next={next}
+            />
+          <List list={trainList}/>
+          <Bottom
+                highSpeed={highSpeed}
+                orderType={orderType}
+                onlyTickets={onlyTickets}
+                isFiltersVisible={isFiltersVisible}
+                ticketTypes={ticketTypes}
+                trainTypes={trainTypes}
+                departStations={departStations}
+                arriveStations={arriveStations}
+                checkedTicketTypes={checkedTicketTypes}
+                checkedTrainTypes={checkedTrainTypes}
+                checkedDepartStations={checkedDepartStations}
+                checkedArriveStations={checkedArriveStations}
+                departTimeStart={departTimeStart}
+                departTimeEnd={departTimeEnd}
+                arriveTimeStart={arriveTimeStart}
+                arriveTimeEnd={arriveTimeEnd}
+                {...bottomCbs}
+            />
       </div>
   );
 }

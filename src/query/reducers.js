@@ -11,9 +11,9 @@ import {
   ACTION_SET_TRAIN_TYPES,
   ACTION_SET_CHECKED_TRAIN_TYPES,
   ACTION_SET_DEPART_STATIONS,
-  ACTION_SET_CHECKED_DEPART_STATTIONS,
+  ACTION_SET_CHECKED_DEPART_STATIONS,
   ACTION_SET_ARRIVE_STATIONS,
-  ACTION_SET_CHECKED_ARRIVE_STATSIONS,
+  ACTION_SET_CHECKED_ARRIVE_STATIONS,
   ACTION_SET_DEPART_TIME_START,
   ACTION_SET_DEPART_TIME_END,
   ACTION_SET_ARRIVE_TIME_START,
@@ -144,10 +144,10 @@ export default {
 
       return state;
   },
-  checkedDepartStattions(state = {}, action) {
+  checkedDepartStations(state = {}, action) {
       const { type, payload } = action;
       switch(type) {
-          case ACTION_SET_CHECKED_DEPART_STATTIONS:
+          case ACTION_SET_CHECKED_DEPART_STATIONS:
               return payload;
           default:
       }
@@ -164,10 +164,10 @@ export default {
 
       return state;
   },
-  checkedArriveStatsions(state = {}, action) {
+  checkedArriveStations(state = {}, action) {
       const { type, payload } = action;
       switch(type) {
-          case ACTION_SET_CHECKED_ARRIVE_STATSIONS:
+          case ACTION_SET_CHECKED_ARRIVE_STATIONS:
               return payload;
           default:
       }

@@ -17,9 +17,9 @@ export const ACTION_SET_CHECKED_TICKET_TYPES = 'SET_CHECKED_TICKET_TYPES';
 export const ACTION_SET_TRAIN_TYPES = 'SET_TRAIN_TYPES';
 export const ACTION_SET_CHECKED_TRAIN_TYPES = 'SET_CHECKED_TRAIN_TYPES';
 export const ACTION_SET_DEPART_STATIONS = 'SET_DEPART_STATIONS';
-export const ACTION_SET_CHECKED_DEPART_STATTIONS = 'SET_CHECKED_DEPART_STATTIONS';
+export const ACTION_SET_CHECKED_DEPART_STATIONS = 'SET_CHECKED_DEPART_STATIONS';
 export const ACTION_SET_ARRIVE_STATIONS = 'SET_ARRIVE_STATIONS';
-export const ACTION_SET_CHECKED_ARRIVE_STATSIONS = 'SET_CHECKED_ARRIVE_STATSIONS';
+export const ACTION_SET_CHECKED_ARRIVE_STATIONS = 'SET_CHECKED_ARRIVE_STATIONS';
 export const ACTION_SET_DEPART_TIME_START = 'SET_DEPART_TIME_START';
 export const ACTION_SET_DEPART_TIME_END = 'SET_DEPART_TIME_END';
 export const ACTION_SET_ARRIVE_TIME_START = 'SET_ARRIVE_TIME_START';
@@ -121,10 +121,10 @@ export function setDepartStations(departStations) {
       payload: departStations,
   };
 }
-export function setCheckedDepartStattions(checkedDepartStattions) {
+export function setCheckedDepartStations(checkedDepartStations) {
   return {
-      type: ACTION_SET_CHECKED_DEPART_STATTIONS,
-      payload: checkedDepartStattions,
+      type: ACTION_SET_CHECKED_DEPART_STATIONS,
+      payload: checkedDepartStations,
   };
 }
 export function setArriveStations(arriveStations) {
@@ -133,10 +133,10 @@ export function setArriveStations(arriveStations) {
       payload: arriveStations,
   };
 }
-export function setCheckedArriveStatsions(checkedArriveStatsions) {
+export function setCheckedArriveStations(checkedArriveStations) {
   return {
-      type: ACTION_SET_CHECKED_ARRIVE_STATSIONS,
-      payload: checkedArriveStatsions,
+      type: ACTION_SET_CHECKED_ARRIVE_STATIONS,
+      payload: checkedArriveStations,
   };
 }
 export function setDepartTimeStart(departTimeStart) {
