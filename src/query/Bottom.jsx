@@ -100,28 +100,53 @@ const BottomModal = memo(function BottomModal(props) {
   });
 
 
+
   const optionGroup = [
-    {
-        title: '坐席类型',
-        options: ticketTypes,
-        checkedMap: checkedTicketTypes,
-    },
-    {
-        title: '车次类型',
-        options: trainTypes,
-        checkedMap: checkedTrainTypes,
-    },
-    {
-        title: '出发车站',
-        options: departStations,
-        checkedMap: checkedDepartStations,
-    },
-    {
-        title: '到达车站',
-        options: arriveStations,
-        checkedMap: checkedArriveStations,
-    }
+      {
+          title: '坐席类型',
+          options: ticketTypes,
+          checkedMap: localCheckedTicketTypes,
+          update: setLocalCheckedTicketTypes,
+      },
+      {
+          title: '车次类型',
+          options: trainTypes,
+          checkedMap: localCheckedTrainTypes,
+          update: setLocalCheckedTrainTypes,
+      },
+      {
+          title: '出发车站',
+          options: departStations,
+          checkedMap: localCheckedDepartStations,
+          update: setLocalCheckedDepartStations
+      },
+      {
+          title: '到达车站',
+          options: arriveStations,
+          checkedMap: localCheckedArriveStations,
+          update: setLocalCheckedArriveStations,
+      }
   ];
+  
+  function sure() {
+    setCheckedTicketTypes(localCheckedTicketTypes);
+    setCheckedTrainTypes(localCheckedTrainTypes);
+    setCheckedDepartStations(localCheckedDepartStations);
+    setCheckedArriveStations(localCheckedArriveStations);
+
+    toggleIsFiltersVisible();
+  }
+
+  function reset() {
+    setLocalCheckedTicketTypes({});
+    setLocalCheckedTrainTypes({});
+    setLocalCheckedDepartStations({});
+    setLocalCheckedArriveStations({});
+    setLocalDepartTimeStart(0);
+    setLocalDepartTimeEnd(24);
+    setLocalArriveTimeStart(0);
+    setLocalArriveTimeEnd(24);
+  }
 
 
   return (
@@ -132,7 +157,7 @@ const BottomModal = memo(function BottomModal(props) {
                       <span className="reset">
                           重置
                       </span>
-                      <span className="ok">
+                      <span className="ok"  onClick={sure}>
                           确定
                       </span>
                   </div>
