@@ -181,7 +181,7 @@ const Suggest = memo(function Suggest(props) {
     <div className="city-suggest">
         <ul className="city-suggest-ul">
             {
-                result.map(item => {
+                fallBackResult.map(item => {
                   return (
                     <SuggestItem
                         key={item.display}
