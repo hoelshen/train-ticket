@@ -1,4 +1,5 @@
 import { h0 } from '../common/fp';
+
 export const ACTION_SET_DEPART_DATE = 'SET_DEPART_DATE';
 export const ACTION_SET_ARRIVE_DATE = 'SET_ARRIVE_DATE';
 export const ACTION_SET_DEPART_TIME_STR = 'SET_DEPART_TIME_STR';
@@ -72,11 +73,11 @@ export function setIsScheduleVisible(isScheduleVisible) {
     };
 }
 export function toggleIsScheduleVisible() {
-    return (dispatch, getState) => {
-        const { isScheduleVisible } = getState();
+  return (dispatch, getState) => {
+      const { isScheduleVisible } = getState();
 
-        dispatch(setIsScheduleVisible(!isScheduleVisible));
-    };
+      dispatch(setIsScheduleVisible(!isScheduleVisible));
+  };
 }
 export function setSearchParsed(searchParsed) {
     return {
@@ -84,17 +85,18 @@ export function setSearchParsed(searchParsed) {
         payload: searchParsed,
     };
 }
-export function nextDate() {
-    return (dispatch, getState) => {
-        const { departDate } = getState();
 
-        dispatch(setDepartDate(h0(departDate) + 86400 * 1000));
-    };
+export function nextDate() {
+  return (dispatch, getState) => {
+      const { departDate } = getState();
+
+      dispatch(setDepartDate(h0(departDate) + 86400 * 1000));
+  };
 }
 export function prevDate() {
-    return (dispatch, getState) => {
-        const { departDate } = getState();
+  return (dispatch, getState) => {
+      const { departDate } = getState();
 
-        dispatch(setDepartDate(h0(departDate) - 86400 * 1000));
-    };
+      dispatch(setDepartDate(h0(departDate) - 86400 * 1000));
+  };
 }

@@ -65,7 +65,8 @@ function App(props) {
         dispatch(setSeatType(type));
         dispatch(setDepartDate(dayjs(date).valueOf()));
         dispatch(setSearchParsed(true));
-    }, [dispatch]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     useEffect(() => {
         if (!searchParsed) {
@@ -94,7 +95,8 @@ function App(props) {
             },
             dispatch
         );
-    }, [dispatch]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const menuCbs = useMemo(() => {
         return bindActionCreators(
@@ -103,7 +105,8 @@ function App(props) {
             },
             dispatch
         );
-    }, [dispatch]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const chooseCbs = useMemo(() => {
         return bindActionCreators(
@@ -112,7 +115,8 @@ function App(props) {
             },
             dispatch
         );
-    }, [dispatch]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     if (!searchParsed) {
         return null;
