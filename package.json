@@ -73,16 +73,31 @@
   "scripts": {
     "start": "node scripts/start.js",
     "build": "node scripts/build.js",
-    "test": "node scripts/test.js"
+    "test": "node scripts/test.js",
+    "format": "eslint src/**/*.{jsx,js}  --fix"
   },
   "eslintConfig": {
-    "extends": "react-app",
+    "extends": [
+      "eslint:recommended",
+      "react-app"
+    ],
     "plugins": [
       "react-hooks"
     ],
     "rules": {
       "react-hooks/rules-of-hooks": "error"
     }
+  },
+  "husky": {
+    "hooks":{
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged":{
+    "*.{jsx,js}":[
+      "eslint --fix",
+      "git add"
+    ]
   },
   "browserslist": {
     "production": [
@@ -97,7 +112,9 @@
     ]
   },
   "devDependencies": {
-    "eslint-plugin-react-hooks": "^3.0.0"
+    "eslint-plugin-react-hooks": "^3.0.0",
+    "husky": "^4.2.5",
+    "lint-staged": "^10.2.11"
   },
   "jest": {
     "roots": [

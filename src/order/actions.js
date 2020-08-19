@@ -25,6 +25,7 @@ export function setDepartStation(departStation) {
         payload: departStation,
     };
 }
+
 export function setArriveStation(arriveStation) {
     return {
         type: ACTION_SET_ARRIVE_STATION,
