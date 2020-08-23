@@ -113,40 +113,43 @@ const Slider = memo(function Slider(props) {
     }, [winSize.width]);
 
     useEffect(() => {
-        startHandle.current.addEventListener(
+        const startCurrent = startHandle.current;
+        const endCurrent = endHandle.current;
+ 
+        startCurrent.addEventListener(
             'touchstart',
             onStartTouchBegin,
             false
         );
-        startHandle.current.addEventListener(
+        startCurrent.addEventListener(
             'touchmove',
             onStartTouchMove,
             false
         );
-        endHandle.current.addEventListener(
+        endCurrent.addEventListener(
             'touchstart',
             onEndTouchBegin,
             false
         );
-        endHandle.current.addEventListener('touchmove', onEndTouchMove, false);
+        endCurrent.addEventListener('touchmove', onEndTouchMove, false);
 
         return () => {
-            startHandle.current.removeEventListener(
+            startCurrent.removeEventListener(
                 'touchstart',
                 onStartTouchBegin,
                 false
             );
-            startHandle.current.removeEventListener(
+            startCurrent.removeEventListener(
                 'touchmove',
                 onStartTouchMove,
                 false
             );
-            endHandle.current.removeEventListener(
+            endCurrent.removeEventListener(
                 'touchstart',
                 onEndTouchBegin,
                 false
             );
-            endHandle.current.removeEventListener(
+            endCurrent.removeEventListener(
                 'touchmove',
                 onEndTouchMove,
                 false

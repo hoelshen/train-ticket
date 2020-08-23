@@ -5,6 +5,7 @@ import React, {
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import './App.css';
+import HighSpeed from './HighSpeed.jsx';
 
 import Header from '../common/Header.jsx';
 import DepartDate from './DepartDate.jsx';
@@ -26,6 +27,7 @@ import {
   showDateSelector,
   hideDateSelector,
   setDepartDate,
+  toggleHighSpeed,
 } from './actions';
 
 function App(props) {
@@ -39,6 +41,7 @@ function App(props) {
       isLoadingCityData,
       dispatch,
       departDate,
+      highSpeed
   } = props;
 
   const onBack = useCallback(() => {
@@ -75,6 +78,14 @@ function App(props) {
     );
   }, [dispatch]);
 
+  const highSpeedCbs = useMemo(() => {
+    return bindActionCreators(
+        {
+            toggle: toggleHighSpeed,
+        },
+        dispatch
+    );
+}, [dispatch]);
 
   const onSelectDate = useCallback(day => {
       if (!day) {
@@ -103,7 +114,8 @@ function App(props) {
               <DepartDate
                   time={departDate}
                   {...departDateCbs}
-              />              
+              />
+              <HighSpeed highSpeed={highSpeed} {...highSpeedCbs} />
               <Submit/>
           </form>
           <CitySelector
